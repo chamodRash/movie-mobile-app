@@ -13,10 +13,7 @@ export default function Index() {
   const router = useRouter();
   const [page, setPage] = useState(1);
 
-  const getMovies = useCallback(
-    () => fetchMovies({ query: "pegging", page }),
-    [page]
-  );
+  const getMovies = useCallback(() => fetchMovies({ query: "", page }), [page]);
 
   const {
     data: movieData,

@@ -1,15 +1,15 @@
 import { icons } from "@/constants/icons";
-import React from "react";
-import { Image, TextInput, View } from "react-native";
+import React, { forwardRef } from "react";
+import { Image, TextInput, View, TextInputProps } from "react-native";
 
-interface Props {
-  onPress?: () => void;
-  placeholder: string;
-  value: string;
+interface Props extends TextInputProps {
   onChangeText: (text: string) => void;
 }
 
-const SearchBar = ({ onPress, placeholder, value, onChangeText }: Props) => {
+const SearchBar = forwardRef<TextInput, Props>((
+  { onChangeText, ...props },
+  ref
+) => {
   return (
     <View className="flex-row items-center bg-dark-200 rounded-full px-6 py-2">
       <Image
@@ -19,15 +19,16 @@ const SearchBar = ({ onPress, placeholder, value, onChangeText }: Props) => {
         tintColor={"#ab8bff"}
       />
       <TextInput
-        placeholder={placeholder}
+        ref={ref}
         placeholderTextColor="#ab8bff"
-        value={value}
         className="flex-1 text-white ml-3 text-lg"
         onChangeText={onChangeText}
-        onPress={onPress}
+        {...props}
       />
     </View>
   );
-};
+});
+
+SearchBar.displayName = "SearchBar";
 
 export default SearchBar;

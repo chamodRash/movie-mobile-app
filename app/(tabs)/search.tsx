@@ -6,12 +6,21 @@ import { images } from "@/constants/images";
 import { fetchMovies } from "@/services/api";
 import { updateSearchCount } from "@/services/appwrite";
 import useFetch from "@/services/useFetch";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 const Search = () => {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const searchRef = useRef<TextInput>(null);
 
   const {
     data: movieData,
@@ -29,18 +38,18 @@ const Search = () => {
 
   // Debounced effect for search term changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // A new search always starts from page 1.
-      if (page === 1) {
-        if (searchTerm.trim()) {
-          loadMovies();
-        } else {
-          reset();
-        }
+    const handler = setTimeout(() => {
+      if (searchTerm.trim()) {
+        setPage(1);
+        loadMovies();
+      } else {
+        reset();
       }
-    }, 500);
+    }, 500); // 500ms debounce delay
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(handler);
+    };
   }, [searchTerm]);
 
   // Effect to update search count when new data arrives from a search
@@ -48,15 +57,17 @@ const Search = () => {
     const update = async () => {
       if (movieData && movieData.results.length > 0 && page === 1) {
         const firstMovie = movieData.results[0];
-        await updateSearchCount(searchTerm, firstMovie);
-        console.log("Search count updated for:", searchTerm);
+        if (firstMovie) {
+          await updateSearchCount(searchTerm, firstMovie);
+          console.log("Search count updated for:", searchTerm);
+        }
       }
     };
 
     if (searchTerm.trim()) {
       update();
     }
-  }, [movieData, page, searchTerm]);
+  }, [movieData]);
 
   // Immediate effect for pagination changes
   useEffect(() => {
@@ -64,6 +75,10 @@ const Search = () => {
       loadMovies();
     }
   }, [page]);
+
+  useFocusEffect(() => {
+    searchRef.current?.focus();
+  });
 
   const handleSearchChange = (text: string) => {
     setSearchTerm(text);
@@ -84,6 +99,7 @@ const Search = () => {
       <Image source={images.bg} className="flex-1 absolute z-0 w-full" />
       <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
       <SearchBar
+        ref={searchRef}
         value={searchTerm}
         onChangeText={handleSearchChange}
         placeholder="Search a movie"

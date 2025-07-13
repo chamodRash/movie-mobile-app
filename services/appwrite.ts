@@ -17,11 +17,12 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
       Query.equal("searchTerm", query),
     ]);
     const document = result.documents[0];
-    console.log("Search result document:", document.title);
 
     // Check if a document exists
     if (result.total > 0 && document) {
-      console.log("Search results count:", document.count);
+      console.log(
+        `Search term '${document.searchTerm}' found with count ${document.count}. Incrementing count...`
+      );
 
       // If a document is found, increment the count field
       const documentId = document.$id;
@@ -29,6 +30,8 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
         count: document.count + 1,
       });
     } else {
+      console.log(`Search term '${query}' not found. Creating new document...`);
+
       // If no document is found, create a new document in the Appwrite database
       await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
         searchTerm: query,
@@ -36,7 +39,9 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
         count: 1,
         poster_url: movie.poster_path
           ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-          : "https://placehold.co/400x800/black/orange?font=raleway&text=Not\nFound",
+          : `https://placehold.co/400x800/black/orange?font=raleway&text=${encodeURIComponent(
+              "Not\nFound"
+            )}`,
         title: movie.title,
       });
     }

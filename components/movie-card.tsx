@@ -21,7 +21,9 @@ const MovieCard = ({ movie }: { movie: Movie }) => {
         {/* adult badge for adult movies */}
         {movie.adult && (
           <View className="absolute top-0 right-0 bg-red-500 px-2 py-1 rounded-bl-lg">
-            <Text className="text-white text-xs font-semibold">Adult</Text>
+            <Text className="text-white text-xs font-semibold tracking-wide">
+              18+
+            </Text>
           </View>
         )}
         <View className="absolute top-0 left-0 bg-green-600 px-2 py-1 rounded-br-lg">
